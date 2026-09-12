@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 26.8.0.3 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.27in 11.69in; margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 115%; background: transparent }
+		h1 { margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h1.western { font-family: "Liberation Serif", serif; font-size: 24pt; font-weight: bold }
+		h1.cjk { font-family: "AR PL SungtiL GB"; font-size: 24pt; font-weight: bold }
+		h1.ctl { font-size: 24pt; font-family: "Noto Sans Devanagari"; font-weight: bold }
+		pre { font-size: 10pt; font-family: "Liberation Mono", monospace; background: transparent }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr">
+<ul><li><p>{ box-sizing: border-box; margin: 0; padding: 0;
+	user-select: none; }<br/>
+html, body {<br/>
+width: 100%; height:
+	100%; overflow: hidden;<br/>
+font-family: -apple-system,
+	BlinkMacSystemFont, &quot;SF Pro Display&quot;, &quot;SF Pro Text&quot;,
+	Inter, sans-serif;<br/>
+background: radial-gradient(circle at 50%
+	20%, #1c1f26 0%, #08090c 60%, #020304 100%);<br/>
+color:
+	var(--text);<br/>
+-webkit-font-smoothing: antialiased;<br/>
+}</p></li>
+</ul>
+<p>/* App Shell Layout */<br/>
+.app {<br/>
+display: flex;
+flex-direction: column; height: 100vh;<br/>
+padding: 20px; max-width:
+1400px; margin: 0 auto;<br/>
+}</p>
+<p>/* Top Navigation Bar */<br/>
+.topbar {<br/>
+display: flex;
+align-items: center; justify-content: space-between;<br/>
+z-index:
+100; backdrop-filter: blur(20px);<br/>
+padding: 12px 20px;
+background: var(--panel); border: 1px solid
+var(--line);<br/>
+border-radius: 20px; box-shadow: 0 20px 40px
+rgba(0,0,0,0.5);<br/>
+}<br/>
+.brand { display: flex; align-items:
+center; gap: 12px; }<br/>
+.logo {<br/>
+width: 36px; height: 36px;
+border-radius: 10px;<br/>
+background: linear-gradient(135deg,
+#2d323f, #111318);<br/>
+border: 1px solid
+rgba(255,255,255,0.2);<br/>
+display: grid; place-items: center;
+font-weight: 800; font-size: 18px;<br/>
+box-shadow: 0 4px 12px
+rgba(0,0,0,0.4);<br/>
+}<br/>
+.brand h1 { font-size: 16px;
+font-weight: 600; letter-spacing: -0.3px; }<br/>
+.brand small {
+color: var(--muted); display: block; font-size: 11px; font-weight:
+400; }</p>
+<p>.modebar {<br/>
+display: flex; gap: 4px; background:
+rgba(0,0,0,0.4);<br/>
+padding: 4px; border-radius: 14px; border: 1px
+solid var(--line);<br/>
+}<br/>
+.modebar button {<br/>
+border: 0;
+background: transparent; padding: 8px 16px;<br/>
+border-radius: 10px;
+color: var(--muted); cursor: pointer;<br/>
+font-size: 12px;
+font-weight: 600; transition: all 0.3s var(--ease-apple);<br/>
+}<br/>
+.modebar
+button.active {<br/>
+background: var(--glass); color:
+#fff;<br/>
+box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0
+rgba(255,255,255,0.2);<br/>
+}</p>
+<p>/* 3D Viewport &amp; Scene Controls */<br/>
+.controls-bar
+{<br/>
+display: flex; align-items: center; justify-content: center;
+gap: 24px;<br/>
+margin-top: 15px; z-index: 100; background:
+var(--panel);<br/>
+padding: 10px 24px; border-radius: 30px; border:
+1px solid var(--line);<br/>
+align-self: center; backdrop-filter:
+blur(20px);<br/>
+}<br/>
+.control-group { display: flex; align-items:
+center; gap: 10px; font-size: 12px; color: var(--muted); font-weight:
+500; }<br/>
+.control-group input[type=range] {<br/>
+appearance: none;
+-webkit-appearance: none; width: 110px; height: 4px;<br/>
+background:
+rgba(255,255,255,0.15); border-radius: 2px; outline:
+none;<br/>
+}<br/>
+.control-group
+input[type=range]::-webkit-slider-thumb {<br/>
+-webkit-appearance:
+none; width: 14px; height: 14px; border-radius: 50%;<br/>
+background:
+var(--accent); cursor: pointer; box-shadow: 0 0 10px var(--accent);<br/>
+}</p>
+<p>/* 3D Canvas Perspective Viewport */<br/>
+.viewport-3d {<br/>
+flex:
+1; perspective: 1400px; display: grid; place-items: center;<br/>
+position:
+relative; cursor: grab; width: 100%; touch-action:
+none;<br/>
+}<br/>
+.viewport-3d:active { cursor: grabbing; }</p>
+<p>/* The Physical Device Container */<br/>
+.device-3d {<br/>
+width:
+780px; height: 520px; position: relative;<br/>
+transform-style:
+preserve-3d; transition: transform 0.1s linear;<br/>
+}</p>
+<p>/* Hinge Axis (Center Pivot) */<br/>
+.hinge-axis {<br/>
+position:
+absolute; inset: 0; display: flex; transform-style: preserve-3d;<br/>
+}</p>
+<p>/* Left &amp; Right Chassis Halves */<br/>
+.chassis {<br/>
+flex:
+1; height: 100%; position: relative; transform-style:
+preserve-3d;<br/>
+background: #16181d; border-radius:
+36px;<br/>
+box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 2px
+rgba(255,255,255,0.3);<br/>
+transition: transform 0.5s
+var(--ease-apple);<br/>
+}<br/>
+.chassis.left {<br/>
+transform-origin:
+right center; border-top-right-radius: 4px;
+border-bottom-right-radius: 4px;<br/>
+}<br/>
+.chassis.right
+{<br/>
+transform-origin: left center; border-top-left-radius: 4px;
+border-bottom-left-radius: 4px;<br/>
+}</p>
+<p>/* Outer Titanium Frame Edges */<br/>
+.chassis::before {<br/>
+content:
+&quot;&quot;; position: absolute; inset: -2px; border-radius:
+38px;<br/>
+background: var(--titanium); z-index: -1;<br/>
+transform:
+translateZ(-2px); box-shadow: 0 10px 30px
+rgba(0,0,0,0.5);<br/>
+}<br/>
+.chassis.left::before {
+border-top-right-radius: 6px; border-bottom-right-radius: 6px;
+}<br/>
+.chassis.right::before { border-top-left-radius: 6px;
+border-bottom-left-radius: 6px; }</p>
+<p>/* Physical Titanium Hinge Architecture */<br/>
+.hinge-spine
+{<br/>
+width: 14px; height: 100%; background:
+var(--titanium);<br/>
+position: relative; z-index: 10;
+transform-style: preserve-3d;<br/>
+box-shadow: inset 1px 0 2px
+rgba(255,255,255,0.2), inset -1px 0 2px rgba(0,0,0,0.8), 0 0 15px
+rgba(0,0,0,0.7);<br/>
+}<br/>
+.hinge-cap {<br/>
+position: absolute;
+left: 0; width: 100%; height: 16px; background: #2a2c33;<br/>
+border:
+1px solid rgba(255,255,255,0.1); border-radius: 3px;<br/>
+}<br/>
+.hinge-cap.top
+{ top: 12px; } .hinge-cap.bottom { bottom: 12px; }</p>
+<p>/* Display Glass and Dynamic Reflection Layer */<br/>
+.screen-frame
+{<br/>
+position: absolute; inset: 10px; background:
+var(--screen-bg);<br/>
+border-radius: 28px; overflow: hidden;
+display: flex; flex-direction: column;<br/>
+border: 1px solid
+rgba(255,255,255,0.1);<br/>
+box-shadow: inset 0 0 12px
+rgba(0,0,0,0.9);<br/>
+}<br/>
+.chassis.left .screen-frame {
+border-top-right-radius: 4px; border-bottom-right-radius: 4px;
+}<br/>
+.chassis.right .screen-frame { border-top-left-radius: 4px;
+border-bottom-left-radius: 4px; }</p>
+<p>.glare-overlay {<br/>
+position: absolute; inset: 0; z-index: 50;
+pointer-events: none;<br/>
+background: linear-gradient(115deg,
+rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 25%, transparent
+60%);<br/>
+transition: opacity 0.3s var(--ease-apple);<br/>
+}<br/>
+.fold-shadow
+{<br/>
+position: absolute; inset: 0; z-index: 40; pointer-events:
+none; opacity: 0;<br/>
+transition: opacity 0.2s
+linear;<br/>
+}<br/>
+.chassis.left .fold-shadow { background:
+linear-gradient(to right, transparent 60%, rgba(0,0,0,0.85) 100%);
+}<br/>
+.chassis.right .fold-shadow { background: linear-gradient(to
+left, transparent 60%, rgba(0,0,0,0.85) 100%); }</p>
+<p>/* Dynamic Floor Shadow */<br/>
+.drop-shadow-floor {<br/>
+position:
+absolute; width: 850px; height: 180px; bottom: -80px; left:
+50%;<br/>
+transform: translateX(-50%) rotateX(90deg)
+translateZ(-180px);<br/>
+background: radial-gradient(ellipse at
+center, rgba(0,0,0,0.75) 0%, transparent 70%);<br/>
+filter:
+blur(20px); pointer-events: none; transition: transform 0.1s
+linear;<br/>
+}</p>
+<p>/* DuoOS Screen Elements */<br/>
+.status-bar {<br/>
+height: 32px;
+padding: 10px 20px 0; display: flex; justify-content:
+space-between;<br/>
+align-items: center; font-size: 11px;
+font-weight: 600; color: #fff; z-index: 20;<br/>
+}<br/>
+.screen-content
+{<br/>
+flex: 1; position: relative; overflow: hidden; padding:
+14px;<br/>
+}<br/>
+.view-layer {<br/>
+position: absolute; inset: 14px;
+display: flex; flex-direction: column;<br/>
+opacity: 0; transform:
+scale(0.96) translateY(10px);<br/>
+transition: all 0.4s
+cubic-bezier(0.16, 1, 0.3, 1); pointer-events:
+none;<br/>
+}<br/>
+.view-layer.active {<br/>
+opacity: 1; transform:
+scale(1) translateY(0); pointer-events: auto;<br/>
+}</p>
+<p>/* MODE 1: GameDeck */<br/>
+.game-viewport {<br/>
+width: 100%;
+height: 100%; border-radius: 20px; position: relative; overflow:
+hidden;<br/>
+background: linear-gradient(180deg, #0f172a 0%, #1e1b4b
+50%, #311042 100%);<br/>
+box-shadow: inset 0 0 20px
+rgba(0,0,0,0.8);<br/>
+}<br/>
+.game-hud {<br/>
+position: absolute;
+top: 12px; inset-x: 16px; display: flex; justify-content:
+space-between;<br/>
+font-size: 11px; font-weight: 800;
+letter-spacing: 1px; color: #38bdf8; z-index: 10;<br/>
+}<br/>
+.game-world
+{ position: absolute; inset: 0; }<br/>
+.moon {<br/>
+position:
+absolute; top: 12%; right: 12%; width: 50px; height:
+50px;<br/>
+background: #fef08a; border-radius: 50%; box-shadow: 0 0
+30px #fef08a;<br/>
+}<br/>
+.platform {<br/>
+position: absolute;
+height: 12px; background: #334155; border-radius: 6px;<br/>
+border:
+2px solid #475569; box-shadow: 0 6px 0 #0f172a;<br/>
+}<br/>
+.p-1 {
+bottom: 25%; left: 10%; width: 35%; }<br/>
+.p-2 { bottom: 45%; right:
+15%; width: 30%; }<br/>
+.p-3 { bottom: 65%; left: 40%; width: 25%;
+}<br/>
+.hero-sprite {<br/>
+position: absolute; width: 22px; height:
+30px; background: #38bdf8;<br/>
+border-radius: 6px; bottom: 25%;
+left: 20%;<br/>
+box-shadow: 0 0 12px #38bdf8; transition: transform
+0.15s ease, left 0.1s linear;<br/>
+}<br/>
+.hero-sprite.jump {
+transform: translateY(-45px) rotate(-10deg); }</p>
+<p>.controller-layout {<br/>
+display: flex; flex-direction: column;
+height: 100%; justify-content: space-between;<br/>
+}<br/>
+.dpad-container
+{<br/>
+width: 130px; height: 130px; position: relative; margin: 10px
+auto;<br/>
+}<br/>
+.ctrl-btn {<br/>
+position: absolute; background:
+linear-gradient(145deg, #2a2e39, #15181e);<br/>
+border: 1px solid
+rgba(255,255,255,0.1); border-radius: 10px; color: #fff;<br/>
+font-weight:
+700; cursor: pointer; display: grid; place-items: center;<br/>
+box-shadow:
+0 4px 10px rgba(0,0,0,0.5), inset 0 1px 0
+rgba(255,255,255,0.1);<br/>
+transition: transform 0.1s ease,
+background 0.1s ease; touch-action: none;<br/>
+}<br/>
+.ctrl-btn:active,
+.ctrl-btn.pressed {<br/>
+transform: scale(0.92); background: #38bdf8;
+color: #000;<br/>
+}<br/>
+.dpad-u { width: 42px; height: 50px; top: 0;
+left: 44px; }<br/>
+.dpad-d { width: 42px; height: 50px; bottom: 0;
+left: 44px; }<br/>
+.dpad-l { width: 50px; height: 42px; top: 44px;
+left: 0; }<br/>
+.dpad-r { width: 50px; height: 42px; top: 44px;
+right: 0; }</p>
+<p>.action-container { width: 130px; height: 130px; position:
+relative; margin: 0 auto; }<br/>
+.btn-round { width: 42px; height:
+42px; border-radius: 50%; }<br/>
+.act-y { top: 0; left: 44px; }
+.act-x { top: 44px; left: 0; }<br/>
+.act-b { top: 44px; right: 0; }
+.act-a { bottom: 0; left: 44px; }</p>
+<p>/* MODE 2: Continuity Surface */<br/>
+.notes-app { height: 100%;
+display: flex; flex-direction: column; gap: 12px; }<br/>
+.app-header
+{ display: flex; justify-content: space-between; align-items: center;
+}<br/>
+.app-header h2 { font-size: 20px; font-weight: 700;
+}<br/>
+.editor-card {<br/>
+flex: 1; background:
+rgba(255,255,255,0.04); border-radius: 16px;<br/>
+border: 1px solid
+var(--line); padding: 16px; font-size: 13px; line-height:
+1.6;<br/>
+outline: none; overflow-y: auto; color:
+#e2e8f0;<br/>
+}<br/>
+.virtual-keyboard {<br/>
+display: flex;
+flex-direction: column; gap: 6px; height: 100%; justify-content:
+center;<br/>
+}<br/>
+.key-row { display: flex; gap: 4px;
+justify-content: center; }<br/>
+.key-cap {<br/>
+flex: 1; height:
+40px; border-radius: 8px; background: rgba(255,255,255,0.08);<br/>
+border:
+1px solid rgba(255,255,255,0.1); color: #fff; font-size:
+12px;<br/>
+font-weight: 500; display: grid; place-items: center;
+cursor: pointer;<br/>
+transition: all 0.1s
+var(--ease-apple);<br/>
+}<br/>
+.key-cap:active { background:
+rgba(255,255,255,0.25); transform: translateY(2px); }<br/>
+.key-cap.w-2
+{ flex: 1.5; background: rgba(255,255,255,0.12); }<br/>
+.key-cap.space
+{ flex: 4; }</p>
+<p>/* MODE 3: Split Focus &amp; Cross-Hinge Handoff
+*/<br/>
+.browser-window {<br/>
+height: 100%; background: #0f1115;
+border-radius: 16px;<br/>
+border: 1px solid var(--line); overflow:
+hidden; display: flex; flex-direction: column;<br/>
+}<br/>
+.browser-bar
+{<br/>
+height: 36px; background: #181b20; display: flex; align-items:
+center;<br/>
+padding: 0 12px; gap: 8px; border-bottom: 1px solid
+var(--line);<br/>
+}<br/>
+.url-box {<br/>
+flex: 1; background:
+#090a0c; height: 22px; border-radius: 6px;<br/>
+display: flex;
+align-items: center; padding: 0 8px; font-size: 10px; color:
+var(--muted);<br/>
+}<br/>
+.web-content { padding: 14px; flex: 1;
+overflow-y: auto; }<br/>
+.draggable-card {<br/>
+height: 140px;
+border-radius: 12px; margin-top: 10px; cursor: grab;<br/>
+background:
+linear-gradient(135deg, #ff007a, #7928ca);<br/>
+display: flex;
+align-items: flex-end; padding: 12px; font-weight: 700; font-size:
+12px;<br/>
+box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition:
+transform 0.2s var(--ease-apple);<br/>
+}<br/>
+.draggable-card:active
+{ cursor: grabbing; transform: scale(0.98); }</p>
+<p>.messages-app {<br/>
+height: 100%; background: #0a0c0e;
+border-radius: 16px;<br/>
+border: 1px solid var(--line); display:
+flex; flex-direction: column;<br/>
+}<br/>
+.msg-list { flex: 1;
+padding: 12px; display: flex; flex-direction: column; gap: 8px;
+overflow-y: auto; }<br/>
+.bubble {<br/>
+max-width: 80%; padding: 8px
+12px; border-radius: 14px; font-size: 11px; line-height:
+1.4;<br/>
+}<br/>
+.bubble.in { background: #1e232d; align-self:
+flex-start; color: #fff; }<br/>
+.bubble.out { background:
+var(--accent); align-self: flex-end; color: #fff; }<br/>
+.drop-zone
+{<br/>
+border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px;
+padding: 12px;<br/>
+text-align: center; font-size: 10px; color:
+var(--muted); transition: all 0.2s ease;<br/>
+}<br/>
+.drop-zone.hover
+{ border-color: var(--accent); background: rgba(41,151,255,0.1); }</p>
+<p style="line-height: 100%; margin-bottom: 0.2in">D</p>
+<h1 class="western" style="line-height: 115%; margin-top: 0in; margin-bottom: 0.1in">
+iPhone Duo</h1>
+<p style="margin-bottom: 0in"><font size="2" style="font-size: 10pt">DuoOS
+3D Spatial Prototype</font> 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><a name="foldVal"></a>
+180° 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><br/>
+
+</p>
+<div id="device" dir="ltr"><p style="line-height: 100%; margin-bottom: 0in">
+	<br/>
+
+	</p>
+</div>
+<pre style="margin-bottom: 0.2in; background: #e1e1e1">    &lt;!-- Left Chassis Display A --&gt;  <br/>
+    &lt;section class=&quot;chassis left&quot; id=&quot;chassisLeft&quot;&gt;  <br/>
+      &lt;div class=&quot;screen-frame&quot;&gt;  <br/>
+        &lt;div class=&quot;glare-overlay&quot;&gt;&lt;/div&gt;  <br/>
+        &lt;div class=&quot;fold-shadow&quot; id=&quot;shadowLeft&quot;&gt;&lt;/div&gt;  <br/>
+        &lt;div class=&quot;status-bar&quot;&gt;&lt;span&gt;9:41&lt;/span&gt;&lt;span&gt;DuoOS&lt;/span&gt;&lt;/div&gt;  <br/>
+        &lt;div class=&quot;screen-content&quot;&gt;  <br/>
+            <br/>
+          &lt;!-- GameDeck Mode Display A --&gt;  <br/>
+          &lt;div class=&quot;view-layer active&quot; id=&quot;game-A&quot;&gt;  <br/>
+            &lt;div class=&quot;game-viewport&quot;&gt;  <br/>
+              &lt;div class=&quot;game-hud&quot;&gt;&lt;span&gt;DUO ARCADE&lt;/span&gt;&lt;span id=&quot;scoreText&quot;&gt;SCORE: 1200&lt;/span&gt;&lt;/div&gt;  <br/>
+              &lt;div class=&quot;game-world&quot;&gt;  <br/>
+                &lt;div class=&quot;moon&quot;&gt;&lt;/div&gt;  <br/>
+                &lt;div class=&quot;platform p-1&quot;&gt;&lt;/div&gt;  <br/>
+                &lt;div class=&quot;platform p-2&quot;&gt;&lt;/div&gt;  <br/>
+                &lt;div class=&quot;platform p-3&quot;&gt;&lt;/div&gt;  <br/>
+                &lt;div class=&quot;hero-sprite&quot; id=&quot;hero&quot;&gt;&lt;/div&gt;  <br/>
+              &lt;/div&gt;  <br/>
+            &lt;/div&gt;  <br/>
+          &lt;/div&gt;  <br/>
+<br/>
+          &lt;!-- Continuity Mode Display A --&gt;  <br/>
+          &lt;div class=&quot;view-layer&quot; id=&quot;continuity-A&quot;&gt;  <br/>
+            &lt;div class=&quot;notes-app&quot;&gt;  <br/>
+              &lt;div class=&quot;app-header&quot;&gt;  <br/>
+                &lt;h2&gt;Notes&lt;/h2&gt;  <br/>
+                &lt;span style=&quot;font-size:10px; color:var(--accent);&quot;&gt;Syncing to Display B&lt;/span&gt;  <br/>
+              &lt;/div&gt;  <br/>
+              &lt;div class=&quot;editor-card&quot; contenteditable=&quot;true&quot; id=&quot;editor&quot;&gt;  <br/>
+                Welcome to DuoOS.&lt;br&gt;&lt;br&gt;Type on the physical surface of Display B below to seamlessly populate this document across the active hinge canvas.  <br/>
+              &lt;/div&gt;  <br/>
+            &lt;/div&gt;  <br/>
+          &lt;/div&gt;  <br/>
+<br/>
+          &lt;!-- Split Mode Display A --&gt;  <br/>
+          &lt;div class=&quot;view-layer&quot; id=&quot;split-A&quot;&gt;  <br/>
+            &lt;div class=&quot;browser-window&quot;&gt;  <br/>
+              &lt;div class=&quot;browser-bar&quot;&gt;  <br/>
+                &lt;div style=&quot;display:flex; gap:4px;&quot;&gt;  <br/>
+                  &lt;span style=&quot;width:6px;height:6px;border-radius:50%;background:#ff5f56;&quot;&gt;&lt;/span&gt;  <br/>
+                  &lt;span style=&quot;width:6px;height:6px;border-radius:50%;background:#ffbd2e;&quot;&gt;&lt;/span&gt;  <br/>
+                  &lt;span style=&quot;width:6px;height:6px;border-radius:50%;background:#27c93f;&quot;&gt;&lt;/span&gt;  <br/>
+                &lt;/div&gt;  <br/>
+                &lt;div class=&quot;url-box&quot;&gt;safari://duo-journal.internal&lt;/div&gt;  <br/>
+              &lt;/div&gt;  <br/>
+              &lt;div class=&quot;web-content&quot;&gt;  <br/>
+                &lt;h3 style=&quot;font-size:14px; margin-bottom:6px;&quot;&gt;Cross-Display Drag&lt;/h3&gt;  <br/>
+                &lt;p style=&quot;font-size:10px; color:var(--muted);&quot;&gt;Drag the media card across the central hinge boundary straight into Messages on Display B.&lt;/p&gt;  <br/>
+                &lt;div class=&quot;draggable-card&quot; id=&quot;dragMedia&quot; draggable=&quot;true&quot;&gt;  <br/>
+                  &lt;span&gt;Interactive Media Asset.png&lt;/span&gt;  <br/>
+                &lt;/div&gt;  <br/>
+              &lt;/div&gt;  <br/>
+            &lt;/div&gt;  <br/>
+          &lt;/div&gt;  <br/>
+<br/>
+        &lt;/div&gt;  <br/>
+      &lt;/div&gt;  <br/>
+    &lt;/section&gt;  <br/>
+<br/>
+    &lt;!-- Mechanical Hinge Core --&gt;  <br/>
+    &lt;div class=&quot;hinge-spine&quot;&gt;  <br/>
+      &lt;div class=&quot;hinge-cap top&quot;&gt;&lt;/div&gt;  <br/>
+      &lt;div class=&quot;hinge-cap bottom&quot;&gt;&lt;/div&gt;  <br/>
+    &lt;/div&gt;  <br/>
+<br/>
+    &lt;!-- Right Chassis Display B --&gt;  <br/>
+    &lt;section class=&quot;chassis right&quot; id=&quot;chassisRight&quot;&gt;  <br/>
+      &lt;div class=&quot;screen-frame&quot;&gt;  <br/>
+        &lt;div class=&quot;glare-overlay&quot;&gt;&lt;/div&gt;  <br/>
+        &lt;div class=&quot;fold-shadow&quot; id=&quot;shadowRight&quot;&gt;&lt;/div&gt;  <br/>
+        &lt;div class=&quot;status-bar&quot;&gt;&lt;span&gt;9:41&lt;/span&gt;&lt;span&gt;100% ⚡&lt;/span&gt;&lt;/div&gt;  <br/>
+        &lt;div class=&quot;screen-content&quot;&gt;  <br/>
+<br/>
+          &lt;!-- GameDeck Mode Display B --&gt;  <br/>
+          &lt;div class=&quot;view-layer active&quot; id=&quot;game-B&quot;&gt;  <br/>
+            &lt;div class=&quot;controller-layout&quot;&gt;  <br/>
+              &lt;div class=&quot;dpad-container&quot;&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn dpad-u&quot; data-key=&quot;up&quot;&gt;▲&lt;/button&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn dpad-d&quot; data-key=&quot;down&quot;&gt;▼&lt;/button&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn dpad-l&quot; data-key=&quot;left&quot;&gt;◀&lt;/button&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn dpad-r&quot; data-key=&quot;right&quot;&gt;▶&lt;/button&gt;  <br/>
+              &lt;/div&gt;  <br/>
+              &lt;div class=&quot;action-container&quot;&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn btn-round act-y&quot; data-key=&quot;y&quot;&gt;Y&lt;/button&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn btn-round act-x&quot; data-key=&quot;x&quot;&gt;X&lt;/button&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn btn-round act-b&quot; data-key=&quot;b&quot;&gt;B&lt;/button&gt;  <br/>
+                &lt;button class=&quot;ctrl-btn btn-round act-a&quot; data-key=&quot;jump&quot;&gt;A&lt;/button&gt;  <br/>
+              &lt;/div&gt;  <br/>
+            &lt;/div&gt;  <br/>
+          &lt;/div&gt;  <br/>
+<br/>
+          &lt;!-- Continuity Mode Display B --&gt;  <br/>
+          &lt;div class=&quot;view-layer&quot; id=&quot;continuity-B&quot;&gt;  <br/>
+            &lt;div class=&quot;virtual-keyboard&quot; id=&quot;keyboard&quot;&gt;&lt;/div&gt;  <br/>
+          &lt;/div&gt;  <br/>
+<br/>
+          &lt;!-- Split Mode Display B --&gt;  <br/>
+          &lt;div class=&quot;view-layer&quot; id=&quot;split-B&quot;&gt;  <br/>
+            &lt;div class=&quot;messages-app&quot;&gt;  <br/>
+              &lt;div class=&quot;msg-list&quot; id=&quot;msgList&quot;&gt;  <br/>
+                &lt;div class=&quot;bubble in&quot;&gt;Hey! Drop that layout design into our chat thread.&lt;/div&gt;  <br/>
+              &lt;/div&gt;  <br/>
+              &lt;div style=&quot;padding:10px;&quot;&gt;  <br/>
+                &lt;div class=&quot;drop-zone&quot; id=&quot;dropZone&quot;&gt;Drop Asset Here Across Hinge&lt;/div&gt;  <br/>
+              &lt;/div&gt;  <br/>
+            &lt;/div&gt;  <br/>
+          &lt;/div&gt;  <br/>
+<br/>
+        &lt;/div&gt;  <br/>
+      &lt;/div&gt;  <br/>
+    &lt;/section&gt;  <br/>
+<br/>
+  &lt;/div&gt;  <br/>
+&lt;/div&gt;  </pre><p>
+<br/>
+<br/>
+
+</p>
+</body>
+</html>
